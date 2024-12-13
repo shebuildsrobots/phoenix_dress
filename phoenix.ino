@@ -81,18 +81,21 @@ void trigger(){
   triggered = true;
   Serial.println("triggered");
   showLEDs();
-   wipeLEDs();
   moveMotors();
+  wipeLEDs();
   triggered = false;
 }
 
 void showLEDs(){
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
+  colorWipe(strip.Color(255, 0, 0), 10); // Red
   // Come down from the phoenix tail, first pixel is the last one in the strip
   for (uint16_t i = 0; i <= 255; i=i+50) {
     // Yellow is 255, 255, 0, so this gradually wipes from red to orangeish to yellow
-    colorWipe(strip.Color(255, i, 0), 50);
+    colorWipe(strip.Color(255, i, 0), 1);
   }
+  //hold at yellow
+  strip.Color(255, 255, 0);
+  strip.show();
 }
 
 void wipeLEDs(){
@@ -123,11 +126,8 @@ void move() {
     }
     left_servo.write(left_target_pos);  //will move slowly
   }
-  //delay(2000);
   moveMiddleServo();
-  //delay(2000);
   moveRightServo();
-  //delay(2000);
 }
 
 void moveMiddleServo() {
