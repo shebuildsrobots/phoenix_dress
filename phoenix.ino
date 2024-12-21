@@ -84,6 +84,8 @@ void trigger(){
   moveMotors();
   wipeLEDs();
   triggered = false;
+  // handle any drastic lighting changes that have occurred while trigger loop was happening
+  longTermReading.reset();
 }
 
 void showLEDs(){
