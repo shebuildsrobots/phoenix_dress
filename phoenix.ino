@@ -8,7 +8,6 @@
 #define photoPin1 A0
 #define photoPin2 A1
 #define pixelPin 9
-//#define testLED 11 //delete
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(59, pixelPin, NEO_GRB + NEO_KHZ800);
 
@@ -39,9 +38,6 @@ unsigned long start_time = millis();
 // 30 seconds
 unsigned long motor_runtime = 1000 * 30;
 
-// Prevent back-to-back trigger loops.
-bool just_triggered = false;
-
 void setup() {
   Serial.begin(9600);
   left_servo.attach(3); //yellow
@@ -62,6 +58,7 @@ void setup() {
   strip.begin();
   strip.setBrightness(50);
   strip.show();
+  trigger();
 }
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
@@ -75,32 +72,23 @@ void loop() {
     historicalAvg = longTermReading.reading(currentReading);
    // Mimic a Serial.println
    delay(10);
-   //Serial.println(currentReading);
-   // If it's not too dark (if the historic avg is not too low),
-   // if 4.7k resistors, threshold is lower (360 with lamp, 75 in darkness)
-   if (historicalAvg > 300) {
-    if (currentReading < (historicalAvg * 0.95) && !triggered && !just_triggered) {
+  // Threshold for relative darkness w/ two 10KOhm resistors
+   if (historicalAvg > 300 ) {
+    if (currentReading < (historicalAvg * 0.95) && !triggered) {
       trigger();
-      just_triggered = true;
-      //Serial.println("triggered");
-    }
-    else {
-      just_triggered = false;
     }
    }
  }
 
 void trigger(){
   triggered = true;
-  //Serial.println("triggered");
+  Serial.println("triggered");
   showLEDs();
   moveMotors();
   wipeLEDs();
   triggered = false;
-  //digitalWrite(testLED, LOW); //DELETE
   // handle any drastic lighting changes that have occurred while trigger loop was happening
   longTermReading.reset();
-  // try adding:
   historicalAvg = 0;
   delay(3000);
 }
@@ -123,7 +111,6 @@ void wipeLEDs(){
 }
 
 void moveMotors(){
-  //digitalWrite(testLED, HIGH); //DELETE
     // run for x seconds, and also be sure to end with motors pointing up
     start_time = millis();
     while (millis() - start_time < motor_runtime) {
